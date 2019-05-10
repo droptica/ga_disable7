@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function ga_disable_menu() {
+  $items['admin/config/development/ga_disable'] = array(
+    'title' => 'GA Disable',
+    'description' => 'Configure Google Analytics Disable.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ga_disable_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/admin.inc',
+  );
+
+  $items['ga_disable/set_cookie'] = array(
+    'title' => 'Set opt-out cookie for GA.',
+    'page callback' => 'ga_disable_set_cookie',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cookie.inc',
+  );
+
+  $items['ga_disable/remove_cookie'] = array(
+    'title' => 'Disable opt-out cookie for GA.',
+    'page callback' => 'ga_disable_remove_cookie',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cookie.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function ga_disable_preprocess_html(&$variables) {
+  // Activate only if GA ID is set.
+  $ga_id = variable_get('ga_disable_id', '');
+  if (empty($ga_id)) {
+    return;
+  }
+
+  // Check if we should force the opt-out.
+  $force = '0';
+  $env = getenv('ENV');
+  $dev_environments = array_map('trim', explode("\n", variable_get('ga_disable_dev_environments', '')));
+  if (!empty($env) && in_array($env, $dev_environments)) {
+    $force = '1';
+  }
+
+  // Add JS above all scripts.
+  $script_content = '<script src="%s" data-id="%s" data-force="%s" id="ga_disable"></script>';
+  $src = base_path() . drupal_get_path('module', 'ga_disable') . '/js/ga_disable.js';
+  $script_tag = array(
+    '#type' => 'markup',
+    '#weight' => -100,
+    '#markup' => sprintf($script_content, $src, $ga_id, $force),
+  );
+
+  drupal_add_html_head($script_tag, 'script_ga_disable');
+}
+

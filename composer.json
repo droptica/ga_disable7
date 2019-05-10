@@ -1,0 +1,7 @@
+{
+  "name": "droptica/ga_disable7",
+  "description": "A Drupal 7 module that provides an opt-out from Google Analytics.",
+  "type": "drupal-module",
+  "keywords": ["Drupal", "Google Analytics"],
+  "license": "GPL-2.0+"
+}
