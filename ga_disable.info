@@ -2,4 +2,4 @@ name = Google Analytics Disable
 description = Gives an opportunity tu turn off Google Analytics while testing the website.
 package = Custom
 core = 7.x
-configure = admin/config/system/ga_disable
+configure = admin/config/development/ga_disable
